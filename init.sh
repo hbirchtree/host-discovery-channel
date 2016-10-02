@@ -1,6 +1,6 @@
 #! /bin/sh
 ### BEGIN INIT INFO
-# Provides:          
+# Provides:          hostdiscoverd
 # Required-Start:    networking
 # Required-Stop:     
 # Should-Start:      glibc
@@ -14,10 +14,9 @@ SCRIPT_LOCATION=/home/pi/host-discover
 PYENV_NAME=pyenv
 PIDFILE=/var/run/host-discover.pid
 
-PATH=$SCRIPT_LOCATION/$PYENV_NAME/bin
 
 do_start () {
-	su pi -c 'python3 $SCRIPT_LOCATION/src/host_discover_server.py &'
+	su pi -c "$SCRIPT_LOCATION/$PYENV_NAME/bin/python3 $SCRIPT_LOCATION/src/host_discover_server.py &"
 	echo $! > $PIDFILE
 }
 
