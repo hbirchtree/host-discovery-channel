@@ -2,7 +2,7 @@
 
 APPDIR="$(dirname $(readlink -f "${0}"))"
 
-LOCAL_PYTHON="${APPDIR}/$1/bin/python3"
+LOCAL_PYTHON="python3"
 PYSCRIPT="${APPDIR}/src/host_discover_server.py"
 
 #
@@ -87,9 +87,9 @@ function main()
     local INTERFACES=$(GET_INTERFACES)
     
     for i in $INTERFACES; do
-        if [ "$i" = "ham0" ]; then
+        if [ "$i" = "ham0" ] || [ "$i" == *"docker" ] || [ "$i" == *"br" ]; then
             # Because Hamachi uses /8 network mask, we skip this case for now
-            echo "Skipping Hamachi"
+            echo "Skipping interface: $i"
             continue
         fi
         SCAN_HOSTS $(GET_SUBNET $i)
