@@ -87,9 +87,8 @@ function main()
     local INTERFACES=$(GET_INTERFACES)
     
     for i in $INTERFACES; do
-        if [ "$i" = "ham0" ] || [ "$i" == *"docker" ] || [ "$i" == *"br" ]; then
-            # Because Hamachi uses /8 network mask, we skip this case for now
-            echo "Skipping interface: $i"
+        if [ "$(echo $(GET_SUBNET $i) | cut -d'/' -f 2)" != "24" ]; then
+            echo "Skipping interface: $i, too large mask ($(echo $(GET_SUBNET $i) | cut -d'/' -f 2))"
             continue
         fi
         SCAN_HOSTS $(GET_SUBNET $i)
