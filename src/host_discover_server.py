@@ -11,9 +11,10 @@ from rest_api import *
 
 
 class Host:
-    def __init__(self,host_name,host_ip,last_online = time.time()):
+    def __init__(self,host_name,host_ip,mac_addr,last_online = time.time()):
         self.hostname = host_name
         self.ip = host_ip
+        self.mac_addr = mac_addr
         self.last_online = last_online
 
 
@@ -69,10 +70,10 @@ def update_host(h):
     inserted = insert_into_db(
             """
             INSERT OR IGNORE
-              INTO HOST(HOSTNAME,LAST_IP,LAST_ONLINE)
-              VALUES(?,?,datetime(?,'unixepoch','localtime'));
+              INTO HOST(HOSTNAME,LAST_IP,MAC_ADDR,LAST_ONLINE)
+              VALUES(?,?,?,datetime(?,'unixepoch','localtime'));
             """,
-            (h.hostname,h.ip,h.last_online)
+            (h.hostname,h.ip,h.mac_addr,h.last_online)
             );
     
     insert_into_db(
@@ -123,7 +124,7 @@ def default_route():
 if __name__ == "__main__":
     if len(argv) > 1:
         if argv[1] == "host":
-            update_host(Host(argv[2],argv[3]));
+            update_host(Host(argv[2],argv[3],argv[4]));
         elif argv[1] == "inf":
             print("Got ",argv[2],argv[3])
             update_interface(Interface(argv[2],argv[3]));
