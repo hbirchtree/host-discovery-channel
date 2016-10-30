@@ -15,10 +15,20 @@ function PARSE_NMAP_OUTPUT()
 }
 
 #
+# $1: input IP
+# returns potential HW address from IP, through ARP table
+#
+function LOOKUP_HWADDR()
+{
+    arp "$1" -H ether -n|grep -v "HWaddress"|sed -n 1p|awk '{print $3}'
+}
+
+#
 # Uses the $SQLITE_DB variable as target DB
 #
 # $1: hostname
 # $2: IP address
+# $3: HW address
 # returns nothing
 #
 function INSERT_HOST()
@@ -27,9 +37,8 @@ function INSERT_HOST()
         echo "Bad host"
         return
     fi
-    echo "Hostname: $1"
-    echo "IP: $2"
-    "${LOCAL_PYTHON}" "${PYSCRIPT}" "host" "$1" "$2"
+    echo "Hostname: $1, IP: $2, MAC: $3"
+    "${LOCAL_PYTHON}" "${PYSCRIPT}" "host" "$1" "$2" "$3"
 }
 
 #
@@ -60,7 +69,9 @@ function SCAN_HOSTS()
     local PARSED_DATA=$(PARSE_NMAP_OUTPUT "$NMAP_DATA")
 
     for e in ${PARSED_DATA}; do
-        INSERT_HOST $(echo $e | cut -d',' -f1) $(echo $e | cut -d',' -f2)
+        local IP="$(echo $e | cut -d',' -f2)"
+        local HOST="$(echo $e | cut -d',' -f1)"
+        INSERT_HOST $HOST $IP $(LOOKUP_HWADDR $IP)
     done
 }
 
