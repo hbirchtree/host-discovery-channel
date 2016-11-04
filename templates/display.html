@@ -53,6 +53,7 @@
                         class="accordion-toggle">
                         <td>{{ h.hostname }}</td>
                         <td>{{ h.ip }}</td>
+                        <td>{{ h.mac_addr }}</td>
                         <td>{{ h.last_online }}</td>
                     </tr>
                     {% endfor %}
@@ -82,5 +83,7 @@
         <!-- /.row -->
     </div>
     <!-- /#page-wrapper -->
+
+    { debugTrash }
 </body>
 </html>

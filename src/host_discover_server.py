@@ -23,13 +23,14 @@ class Host:
 """
 def get_all_hosts():
     hosts = query_db("SELECT * FROM HOST;");
-    host_list = [Host(h[1],h[2],h[3]) for h in hosts];
+    host_list = [Host(h[1],h[3],h[2],h[4]) for h in hosts];
     return host_list;
 
 
 def get_interface_hosts(inf):
     out = []
     # Check for validity
+    print(inf);
     if inf.subwidth == 0:
         return out;
     # We don't want to really implement this, we cheat for now
@@ -59,6 +60,7 @@ class Interface:
 def get_all_interfaces():
     infs = query_db("SELECT * FROM INTERFACE;");
     inf_list = [Interface(i[0],i[1]) for i in infs];
+    print(inf_list);
     return inf_list;
 
 
@@ -67,14 +69,17 @@ def get_all_interfaces():
     We do two queries because it may not exist
 """
 def update_host(h):
-    inserted = insert_into_db(
-            """
-            INSERT OR IGNORE
-              INTO HOST(HOSTNAME,LAST_IP,MAC_ADDR,LAST_ONLINE)
-              VALUES(?,?,?,datetime(?,'unixepoch','localtime'));
-            """,
-            (h.hostname,h.ip,h.mac_addr,h.last_online)
-            );
+    try:
+        inserted = insert_into_db(
+                """
+                INSERT
+                  INTO HOST(HOSTNAME,LAST_IP,MAC_ADDR,LAST_ONLINE)
+                  VALUES(?,?,?,datetime(?,'unixepoch','localtime'));
+                """,
+                (h.hostname,h.ip,h.mac_addr,h.last_online)
+                );
+    except sqlite3.IntegrityError:
+        pass;
     
     insert_into_db(
             """
@@ -113,11 +118,14 @@ def update_interface(i):
 """
 @app.route("/",methods=['GET'])
 def default_route():
+    infs = get_all_interfaces();
+    print("Interface data:",infs);
     return render_template('display.html',
-        name='index',interfaces=get_all_interfaces(),
-        categories=("Host","IP address","Last seen"),
-        categories_len=3,
+        name='index',interfaces=infs,
+        categories=("Host","IP address","MAC address","Last seen"),
+        categories_len=4,
         title=app.config['PAGE_TITLE'],
+        debugTrash=str(infs),
         project=app.config['PROJECT_TITLE']);
 
 
